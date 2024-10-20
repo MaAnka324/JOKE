@@ -11,7 +11,6 @@ export default function HomeScreen() {
   const dispatch = useAppDispatch();
   const jokeState = useAppSelector((state) => state.joke);
   const today = moment().format('YYYY-MM-DD')
-  // const today = '2024-10-10'
   let [jokesArr, setJokesArr] = useState(null) 
   let [todayJoke, setTodayJoke] = useState(null)
   let [update, setUpdate] = useState(false)
@@ -71,17 +70,6 @@ useEffect(()=> {
   }
 
 
-const clearJokes = async () => {
-  try {
-    await AsyncStorage.removeItem('savedJokes');
-    setJokesArr(null);
-    setTodayJoke(null);
-  
-  } catch (e) {
-    console.error("Failed to delete jokes", e);
-  }
-};
-
 if (todayJoke === null || jokesArr === null) {
   return <Text>LOADING</Text>
 }
@@ -99,12 +87,11 @@ return (
           <Text style={styles.jokeText}>{todayJoke.joke.delivery}</Text>
         </View>
       )}
-      <ButtonLike id={todayJoke.joke.id}/>
+      <ButtonLike 
+      id={todayJoke.joke.id}
+      component={'today'}
+      />
     </View>
-
-        
-
-    {/* <Button title="Delete All Jokes" onPress={clearJokes} /> */}
     </View>
   );
 }
@@ -118,7 +105,7 @@ const styles = StyleSheet.create({
   },
   joke: {
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     padding: 20,
   },
   title: {

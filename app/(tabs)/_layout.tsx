@@ -1,20 +1,23 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
 import { Provider } from 'react-redux';
 import store from '@/store/store';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
 
   return (
     <Provider store={store}>
       <Tabs
         screenOptions={{
-          tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+          tabBarActiveTintColor: '#9763FF',
+          tabBarStyle: {
+            backgroundColor: 'white', 
+            borderTopColor: '#E6E6E6', 
+            borderTopWidth: 1, 
+            height: 60,
+            paddingBottom: 10,
+          },
           headerShown: false,
         }}>
         <Tabs.Screen
@@ -22,7 +25,7 @@ export default function TabLayout() {
           options={{
             title: 'Today',
             tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
+              <TabBarIcon name={'flash-outline'} color={focused ? '#9763FF' : 'gray'} />
             ),
           }}
         />
@@ -31,7 +34,7 @@ export default function TabLayout() {
           options={{
             title: 'History',
             tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon name={focused ? 'code-slash' : 'code-slash-outline'} color={color} />
+              <TabBarIcon name={'time-outline'} color={focused ? '#9763FF' : 'gray'} />
             ),
           }}
         />

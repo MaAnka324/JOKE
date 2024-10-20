@@ -20,7 +20,7 @@ type Delivery = {
     lang: string;
 }
 
-type Joke = {
+type SingleJoke = {
     error: boolean;
     category: string;
     type: string;
@@ -38,10 +38,23 @@ type Joke = {
     lang: string;
 }
 
-export type InitialStateType = Delivery | Joke
+type Joke = Delivery | SingleJoke
+
+type JokeArr = {
+    date: string
+    like: boolean
+    joke: Joke
+}
+
+export type InitialStateType = {
+    joke: Joke
+    jokeArr: JokeArr[]
+}
   
 
   export const jokeInitialState: InitialStateType = {
+    jokeArr: [],
+    joke: {
     error: false,
     category: "",
     type: "",
@@ -58,26 +71,23 @@ export type InitialStateType = Delivery | Joke
     id: 0,
     safe: false,
     lang: "",
+    }
   };
 
 
   const jokeReducer = (state: InitialStateType = jokeInitialState, action: UserActionsTypes): InitialStateType => {
     switch (action.type) {
         case "GET-JOKE":
-            if (action.payload.joke) {
                 return {
                     ...state,
-                    joke: action.payload.joke,
-                    setup: "",
-                    delivery: "",
-                };
-            } else {
-                return {
-                    ...state,
-                    setup: action.payload.setup,
-                    delivery: action.payload.delivery,
-                };
+                    joke: action.jokeObj
+                }
+        case "UPDATE-ARRAY":
+            return {
+                ...state,
+                jokeArr: action.jokeArr
             }
+                            
         default:
             return state;
     }
@@ -85,42 +95,34 @@ export type InitialStateType = Delivery | Joke
 
 
 
-export const getJokeAC = (jokeOrSetup: string, delivery?: string) => {
+export const getJokeAC = (jokeObj: Joke) => {
     return {
         type: "GET-JOKE",
-        payload: {
-            joke: delivery ? undefined : jokeOrSetup,
-            setup: delivery ? jokeOrSetup : undefined,
-            delivery: delivery || undefined,
-        }
+        jokeObj
+    } as const;
+}
+
+export const updateArr = (jokeArr: JokeArr[]) => {
+    return {
+        type: "UPDATE-ARRAY",
+        jokeArr
     } as const;
 }
 
 
 
-
 export type UserActionsTypes = ReturnType<typeof getJokeAC>
+| ReturnType<typeof updateArr>
 
 export default jokeReducer
 
 
 //thunks
-
 export const getRandomJoke = (): AppThunk => async (dispatch) => {
     try {
         const res = await jokeAPI.getRandomJoke();
         console.log(res.data);
-
-        if ('joke' in res.data) {
-            // Обрабатываем случай, когда возвращается Joke
-            dispatch(getJokeAC(res.data.joke));
-        } else if ('setup' in res.data && 'delivery' in res.data) {
-            // Обрабатываем случай, когда возвращается Delivery
-            dispatch(getJokeAC(res.data.setup, res.data.delivery));
-        } else {
-            console.error("Unknown data format", res.data);
-        }
-        
+        dispatch(getJokeAC(res.data));
     } catch (e) {
         const msg = "getRandomJoke";
         console.error(msg, e);

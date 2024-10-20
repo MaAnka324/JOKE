@@ -1,4 +1,4 @@
-import axios, { AxiosInstance } from "axios";
+import axios from "axios";
 
 const baseURL = "https://v2.jokeapi.dev/";
 

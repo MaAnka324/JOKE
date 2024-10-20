@@ -1,3 +1,4 @@
+import { ButtonLike } from '@/components/ButtonLike';
 import {  getRandomJoke, updateArr } from '@/reducers/joke-reducer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import moment from 'moment';
@@ -9,8 +10,8 @@ import { useAppDispatch, useAppSelector } from "../../store/store";
 export default function HomeScreen() {
   const dispatch = useAppDispatch();
   const jokeState = useAppSelector((state) => state.joke);
-  // const today = moment().format('YYYY-MM-DD')
-  const today = '2024-10-03'
+  const today = moment().format('YYYY-MM-DD')
+  // const today = '2024-10-10'
   let [jokesArr, setJokesArr] = useState(null) 
   let [todayJoke, setTodayJoke] = useState(null)
   let [update, setUpdate] = useState(false)
@@ -65,7 +66,7 @@ useEffect(()=> {
     setUpdate(!update)
       }
     }catch(e){
-
+      console.error("Failed to save joke from in storage", e);
     }
   }
 
@@ -98,7 +99,10 @@ return (
           <Text style={styles.jokeText}>{todayJoke.joke.delivery}</Text>
         </View>
       )}
+      <ButtonLike id={todayJoke.joke.id}/>
     </View>
+
+        
 
     {/* <Button title="Delete All Jokes" onPress={clearJokes} /> */}
     </View>

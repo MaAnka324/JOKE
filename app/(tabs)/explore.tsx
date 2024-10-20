@@ -9,62 +9,75 @@ export default function TabTwoScreen() {
   useEffect(() => {}, [jokes]);
 
   return (
-    <ScrollView style={styles.container}>
-      {jokes.length > 0 ? (
-        jokes.map((item, index) => {
-          if (!item || !item.joke) return null;
-          return (
-            <View key={index} style={styles.jokeContainer}>
-             
-              {item.joke.setup && item.joke.delivery ? (
-                <>
-                  <Text style={styles.setupText}>{item.joke.setup}</Text>
-                  <Text style={styles.deliveryText}>{item.joke.delivery}</Text>
-                </>
-              ) : (
-                <Text style={styles.jokeText}>{item.joke.joke}</Text>
-              )}
-              <ButtonLike id={item.joke.id}/>
-              <Text>{item.date}</Text>
-            </View>
-          );
-        })
-      ) : (
-        <Text>No jokes available</Text>
-      )}
-    </ScrollView>
+    <View style={styles.container}>
+      <Text style={styles.title}>History</Text>
+      <View style={styles.line} />
+      <ScrollView >
+        {jokes.length > 0 ? (
+          jokes.map((item, index) => {
+            if (!item || !item.joke) return null;
+            return (
+              <View key={index} style={styles.jokeContainer}>
+                <View style={styles.jokeAndLike}>
+                  {item.joke.setup && item.joke.delivery ? (
+                    <>
+                    <View style={styles.jokeTextContainer}>
+                      <Text style={styles.jokeText}>{item.joke.setup}</Text>
+                      <Text style={styles.jokeText}>{item.joke.delivery}</Text>
+                    </View>
+                    </>
+                  ) : (
+                    <View style={styles.jokeTextContainer}>
+                      <Text style={styles.jokeText}>{item.joke.joke}</Text>
+                    </View>
+                  )}
+                  <ButtonLike id={item.joke.id}/>
+                </View>
+                <View style={styles.line} />
+              </View>
+            );
+          })
+        ) : (
+          <Text>No jokes available</Text>
+        )}
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    backgroundColor: 'white'
   },
   jokeContainer: {
-    marginBottom: 20,
     padding: 10,
-    backgroundColor: '#f0f0f0',
     borderRadius: 8,
+  },
+  jokeAndLike: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'flex-start'
   },
   jokeText: {
     fontSize: 18,
+    fontWeight: '500',
     marginBottom: 8,
   },
-  setupText: {
-    fontSize: 16,
+  jokeTextContainer: {
+    width: '80%',
+    paddingBottom: 20,
+  },
+  title: {
+    fontSize: 32,
     fontWeight: 'bold',
+    marginTop: 100,
+    padding: 20
   },
-  deliveryText: {
-    fontSize: 16,
-    marginBottom: 8,
-  },
-  categoryText: {
-    fontSize: 14,
-    color: 'gray',
-  },
-  flagsText: {
-    fontSize: 12,
-    color: 'blue',
+  line: {
+    height: 1,
+    width: '100%',
+    backgroundColor: '#E6E6E6',
   },
 });

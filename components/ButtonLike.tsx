@@ -1,16 +1,16 @@
-// import { TouchableOpacity } from "react-native-gesture-handler"
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { StyleSheet, TouchableOpacity } from 'react-native';
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { updateArr } from "@/reducers/joke-reducer";
-import { useEffect, useState } from "react";
-
+import React, { useEffect, useState } from "react";
+import { TabBarIcon } from './navigation/TabBarIcon';
 
 type Like = {
     id: number
+    component?: string
 }
 
-export const ButtonLike = (props: Like) => {
+export const ButtonLike = ({ id, component }: Like) => {
     const dispatch = useAppDispatch();
     const jokeArr = useAppSelector((state) => state.joke.jokeArr);
 
@@ -19,7 +19,7 @@ export const ButtonLike = (props: Like) => {
     const likeHandler = async () => {
 
         const updatedArr = jokeArr.map(item => {
-            return item.joke.id === props.id 
+            return item.joke.id === id 
             ? { ...item, like: !item.like }
             : item
         })
@@ -33,13 +33,40 @@ export const ButtonLike = (props: Like) => {
     }
 
     useEffect(()=> {
-        const likeValue = jokeArr.find(j => j.joke.id === props.id)
+        const likeValue = jokeArr.find(j => j.joke.id === id)
         setLike(likeValue?.like)
     })
 
+    const size = component === 'today' ? 70 : 50;
+
     return (
-        <TouchableOpacity onPress={likeHandler}>
-            <Text>{like ? '❤️' : '🩶'}</Text>
+        <TouchableOpacity 
+        style={[styles.roundButton, 
+            {
+                backgroundColor: like ? '#9763FF' : '#EAE0FF',
+                width: size,
+                height: size,
+            }
+        ]}  
+        onPress={likeHandler}>
+            <TabBarIcon 
+            size={component == 'today' ? 35 : 28} 
+            name={like ? 'heart' : 'heart-outline'} 
+            color={like ? 'white' : '#9763FF'} />
         </TouchableOpacity>
     )
 }
+
+const styles = StyleSheet.create({
+    roundButton: {
+        borderRadius: 35, 
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+    },
+});

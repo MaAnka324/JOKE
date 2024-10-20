@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useAppSelector } from '@/store/store';
+import { ButtonLike } from '@/components/ButtonLike';
 
 export default function TabTwoScreen() {
   const jokes = useAppSelector((state) => state.joke.jokeArr);
@@ -23,6 +24,8 @@ export default function TabTwoScreen() {
               ) : (
                 <Text style={styles.jokeText}>{item.joke.joke}</Text>
               )}
+              <ButtonLike id={item.joke.id}/>
+              <Text>{item.date}</Text>
             </View>
           );
         })

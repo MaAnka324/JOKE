@@ -1,4 +1,11 @@
-# Welcome to your Expo app 👋
+# Welcome to JOKE app 👋
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/0b89b0b1-5557-4993-b1ca-ac336429cee4" alt="Image 1" width="200"/>
+  <img src="https://github.com/user-attachments/assets/3bece50b-d47e-4ea5-9ba0-044655455365" alt="Image 2" width="200"/>
+</p>
+
+This app shows you a new joke every day. Jokes are saved using Async Storage. You can also give them a like 💜
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 

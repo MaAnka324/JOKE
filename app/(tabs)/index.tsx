@@ -1,9 +1,9 @@
 import { ButtonLike } from '@/components/ButtonLike';
-import {  getRandomJoke, updateArr } from '@/reducers/joke-reducer';
+import { getRandomJoke, JokeArr, updateArr } from '@/reducers/joke-reducer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, Button } from 'react-native';
+import { StyleSheet, View, Text } from 'react-native';
 import { useAppDispatch, useAppSelector } from "../../store/store";
 
 
@@ -11,67 +11,60 @@ export default function HomeScreen() {
   const dispatch = useAppDispatch();
   const jokeState = useAppSelector((state) => state.joke);
   const today = moment().format('YYYY-MM-DD')
-  let [jokesArr, setJokesArr] = useState(null) 
+
   let [todayJoke, setTodayJoke] = useState(null)
   let [update, setUpdate] = useState(false)
 
-useEffect(()=> {
-  const loadJoke = async () => {
-    try {
-      const storedJokes = await AsyncStorage.getItem('savedJokes');
+  useEffect(() => {
+    const loadJoke = async () => {
+      try {
+        const storedJokes = await AsyncStorage.getItem('savedJokes');
 
-      if(storedJokes != null) {
-        const j = JSON.parse(storedJokes)
-        dispatch(updateArr(j))
+        if (storedJokes) {
+          const jokesArray: JokeArr[] = JSON.parse(storedJokes);
+          dispatch(updateArr(jokesArray));
 
-        const jokeToday = j.find(j => j.date === today);
+          const jokeToday = jokesArray.find(j => j.date === today);
 
-        if(jokeToday){
-          setJokesArr(j)
-          setTodayJoke(jokeToday)
-        }else {
+          if (jokeToday) {
+            setTodayJoke(jokeToday);
+          } else {
+            await fetchJoke();
+          }
+        } else {
           await fetchJoke();
         }
-      }else{
-          await fetchJoke();
+      } catch (e) {
+        console.error('Failed to load joke from storage', e);
       }
-    } catch (e) {
-      console.error("Failed to load joke from storage", e);
-    } 
-  };
+    };
 
-  const fetchJoke = async () => {
-    try {
-      await dispatch(getRandomJoke());
-      newJoke()
-    } catch (e) {
-      console.error("Failed to fetch joke", e);
-    }
-  };
-
-  loadJoke();
-}, [dispatch, today, update])
-
-  const newJoke = async () => {
-    try{
-      if(jokeState.joke.id !== 0){
-        const storedJokes = await AsyncStorage.getItem('savedJokes');
-    let jokesArray = storedJokes ? JSON.parse(storedJokes) : [];
-
-    jokesArray.unshift({date: today, like: false, joke: jokeState.joke});
-
-    await AsyncStorage.setItem('savedJokes', JSON.stringify(jokesArray));
-
-    setUpdate(!update)
+    const fetchJoke = async () => {
+      try {
+        await dispatch(getRandomJoke());
+        setUpdate(!update);
+      } catch (e) {
+        console.error('Failed to fetch joke', e);
       }
-    }catch(e){
-      console.error("Failed to save joke from in storage", e);
+    };
+
+    loadJoke();
+  }, [dispatch, today, update]);
+
+  
+  useEffect(() => {
+    if (jokeState.jokeArr.length > 0) {
+      const jokeToday = jokeState.jokeArr.find(j => j.date === today);
+      setTodayJoke(jokeToday ?? null);
     }
-  }
+  }, [jokeState.jokeArr, jokeState.joke]);
+ 
 
-
-if (todayJoke === null || jokesArr === null) {
-  return <Text>LOADING</Text>
+if (todayJoke === null) {
+  return <Text 
+  style={{ backgroundColor: 'white', flex: 1, padding: 200}}>
+    LOADING
+    </Text>
 }
 
 return (

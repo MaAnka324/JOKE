@@ -1,12 +1,13 @@
-import { jokeAPI } from "@/api/api";
-import {AppThunk} from "../store/store";
+import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
+import { jokeAPI } from '@/api/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import moment from 'moment';
 
-type Delivery = {
+
+type BaseJoke = {
     error: boolean;
     category: string;
     type: string;
-    setup: string | undefined;
-    delivery: string | undefined;
     flags: {
       nsfw: boolean;
       religious: boolean;
@@ -18,48 +19,38 @@ type Delivery = {
     id: number;
     safe: boolean;
     lang: string;
-}
+};
+  
+type DeliveryJoke = BaseJoke & {
+setup: string;
+delivery: string;
+};
 
-type SingleJoke = {
-    error: boolean;
-    category: string;
-    type: string;
-    joke: string;
-    flags: {
-      nsfw: boolean;
-      religious: boolean;
-      political: boolean;
-      racist: boolean;
-      sexist: boolean;
-      explicit: boolean;
-    };
-    id: number;
-    safe: boolean;
-    lang: string;
-}
+type SingleJoke = BaseJoke & {
+joke: string;
+};
 
-type Joke = Delivery | SingleJoke
+type Joke = DeliveryJoke | SingleJoke;
 
-type JokeArr = {
-    date: string
-    like: boolean
-    joke: Joke
-}
+export type JokeArr = {
+  date: string;
+  like: boolean;
+  joke: Joke;
+};
 
 export type InitialStateType = {
-    joke: Joke
-    jokeArr: JokeArr[]
-}
-  
+  joke: Joke;
+  jokeArr: JokeArr[];
+};
 
-  export const jokeInitialState: InitialStateType = {
-    jokeArr: [],
-    joke: {
+const initialState: InitialStateType = {
+  jokeArr: [],
+  joke: {
     error: false,
-    category: "",
-    type: "",
-    setup: "",
-    delivery: "",
+    category: '',
+    type: '',
+    setup: '',
+    delivery: '',
     flags: {
       nsfw: false,
       religious: false,
@@ -70,63 +61,46 @@ export type InitialStateType = {
     },
     id: 0,
     safe: false,
-    lang: "",
-    }
-  };
-
-
-  const jokeReducer = (state: InitialStateType = jokeInitialState, action: UserActionsTypes): InitialStateType => {
-    switch (action.type) {
-        case "GET-JOKE":
-                return {
-                    ...state,
-                    joke: action.jokeObj
-                }
-        case "UPDATE-ARRAY":
-            return {
-                ...state,
-                jokeArr: action.jokeArr
-            }
-                            
-        default:
-            return state;
-    }
-}
-
-
-
-export const getJokeAC = (jokeObj: Joke) => {
-    return {
-        type: "GET-JOKE",
-        jokeObj
-    } as const;
-}
-
-export const updateArr = (jokeArr: JokeArr[]) => {
-    return {
-        type: "UPDATE-ARRAY",
-        jokeArr
-    } as const;
-}
-
-
-
-export type UserActionsTypes = ReturnType<typeof getJokeAC>
-| ReturnType<typeof updateArr>
-
-export default jokeReducer
-
-
-//thunks
-export const getRandomJoke = (): AppThunk => async (dispatch) => {
-    try {
-        const res = await jokeAPI.getRandomJoke();
-        console.log(res.data);
-        dispatch(getJokeAC(res.data));
-    } catch (e) {
-        const msg = "getRandomJoke";
-        console.error(msg, e);
-        throw new Error(msg);
-    }
+    lang: '',
+  },
 };
 
+export const getRandomJoke = createAsyncThunk(
+    'jokes/getRandomJoke',
+    async () => {
+      const response = await jokeAPI.getRandomJoke();
+      const today = moment().format('YYYY-MM-DD')
+      
+      const storedJokes = await AsyncStorage.getItem('savedJokes');
+      let jokesArray: JokeArr[] = storedJokes ? JSON.parse(storedJokes) : [];
+  
+      jokesArray.unshift({
+        date: today,
+        like: false,
+        joke: response.data,
+      });
+  
+      await AsyncStorage.setItem('savedJokes', JSON.stringify(jokesArray));
+      
+      return response.data;
+    }
+  );
+
+const jokeSlice = createSlice({
+  name: 'joke',
+  initialState,
+  reducers: {
+    updateArr: (state, action: PayloadAction<JokeArr[]>) => {
+      state.jokeArr = action.payload;
+    },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(getRandomJoke.fulfilled, (state, action: PayloadAction<Joke>) => {
+      state.joke = action.payload;
+    });
+  },
+});
+
+export const { updateArr } = jokeSlice.actions;
+
+export default jokeSlice.reducer;
